@@ -1,11 +1,14 @@
-FROM php:8.4-fpm
+FROM php:8.1-fpm
 
-WORKDIR /var/www/html
+RUN apt-get update && apt-get install -y --no-install-recommends nginx
 
-COPY . /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+COPY default.conf /etc/nginx/sites-available/default
+
+COPY . /var/www/html/
+
+WORKDIR /var/www/html/
 
 EXPOSE 80
 
-CMD ["php-fpm"]
+CMD service nginx start && php-fpm
