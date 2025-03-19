@@ -11,6 +11,8 @@ services:
     build: .
     ports:
       - "8080:80"
+    volumes:
+      - app_data:/var/www/html/storage
   phpmyadmin:
     image: phpmyadmin
     restart: always
@@ -18,3 +20,5 @@ services:
       - "80:80"
     environment:
       - PMA_ARBITRARY=1
+volumes:
+  app_data:

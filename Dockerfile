@@ -9,6 +9,8 @@ COPY . /var/www/html/
 
 WORKDIR /var/www/html/
 
+VOLUME /var/www/html/storage
+
 EXPOSE 80
 
 CMD service nginx start && php-fpm
