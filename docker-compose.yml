@@ -2,8 +2,8 @@ version: '3.1'
 
 networks:
   my_network:
-services:
 
+services:
   db:
     image: mysql
     restart: always
@@ -11,22 +11,25 @@ services:
       - my_network
     environment:
       MYSQL_ROOT_PASSWORD: 123
+
   php:
     build: .
     networks:
       - my_network
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - app_data:/var/www/html/storage
+
   phpmyadmin:
     image: phpmyadmin
     restart: always
     networks:
       - my_network
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
       - PMA_ARBITRARY=1
+
 volumes:
   app_data:
