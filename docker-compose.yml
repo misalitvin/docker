@@ -2,6 +2,7 @@ version: '3.1'
 
 networks:
   my_network:
+    driver: bridge
 
 services:
   db:
@@ -10,7 +11,15 @@ services:
     networks:
       - my_network
     environment:
-      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+        interval: 30s
+        retries: 3
+        timeout: 5s
 
   php:
     build: .
@@ -20,6 +29,13 @@ services:
       - "80:80"
     volumes:
       - app_data:/var/www/html/storage
+    depends_on:
+      - db
+    healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost/" ]
+        interval: 30s
+        retries: 3
+        timeout: 5s
 
   phpmyadmin:
     image: phpmyadmin
@@ -29,7 +45,34 @@ services:
     ports:
       - "8080:80"
     environment:
-      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+        - db
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - my_network
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+
 
 volumes:
   app_data:
+  grafana-data:
+
